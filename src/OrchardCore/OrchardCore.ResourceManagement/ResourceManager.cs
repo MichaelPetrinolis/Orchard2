@@ -443,6 +443,9 @@ namespace OrchardCore.ResourceManagement
 
             if (dependencies != null)
             {
+                // share search instance
+                var tempSettings = new RequireSettings();
+
                 for (var i = 0; i < dependencies.Count; i++)
                 {
                     var d = dependencies[i];
@@ -455,22 +458,17 @@ namespace OrchardCore.ResourceManagement
                         version = d[(idx + 1)..];
                     }
 
-                    var tempSettings = new RequireSettings()
-                    {
-                        Type = resource.Type,
-                        Name = name,
-                        Version = version
-                    };
+                    tempSettings.Type = resource.Type;
+                    tempSettings.Name = name;
+                    tempSettings.Version = version;
 
                     var dependency = FindResource(tempSettings);
                     if (dependency == null)
                     {
                         continue;
                     }
-                    tempSettings.Combine((RequireSettings)allResources[dependency] ?? dependencySettings)
-                        .UpdatePositionFromDependent(dependencySettings);
-                    ExpandDependencies(dependency, tempSettings, allResources);
-                    dependencySettings.UpdatePositionFromDependency(tempSettings);
+
+                    ExpandDependencies(dependency, dependencySettings, allResources);
                 }
             }
 
